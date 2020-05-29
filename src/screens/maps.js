@@ -50,7 +50,7 @@ const MapScreen = () => {
     getLocationHandler();
   }, [])
   const { locationChosen, region, destination, duration, location, distance, bikeRegion, allCords } = state;
-  const [index, setIndex] = useState(0)
+  const [index, setIndex] = useState(0);
   useEffect(() => {
     if (allCords && allCords !== undefined && allCords.length && index < allCords.length && locationChosen !== false) {
       let start = {
