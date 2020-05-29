@@ -18,9 +18,10 @@ import haversine from 'haversine';
 Geocoder.init(GOOGLE_API_KEY);
 const MapScreen = () => {
   var mapRef = useRef(null);
-  var watchRef = useRef(null);
+  var watchRef = null;
   const initState = {
     allCords: [],
+    watchRef: useRef(null),
     bikeRegion: {
       latitude: 33.666906,
       longitude: 73.075373,
@@ -48,11 +49,14 @@ const MapScreen = () => {
   const [state, setState] = useState(initState);
   useEffect(() => {
     getLocationHandler();
+    watchPositionHandler();
   }, [])
   const { locationChosen, region, destination, duration, location, distance, bikeRegion, allCords } = state;
   const [index, setIndex] = useState(0);
   useEffect(() => {
     if (allCords && allCords !== undefined && allCords.length && index < allCords.length && locationChosen !== false) {
+      var dis = null;
+      var dur = null;
       let start = {
         latitude: allCords[index].latitude,
         longitude: allCords[index].longitude,
@@ -61,12 +65,20 @@ const MapScreen = () => {
         latitude: allCords[allCords.length - 1].latitude,
         longitude: allCords[allCords.length - 1].longitude
       }
-      let result = haversine(start, end, { unit: 'km', })
-      console.log('New distance :', result)
+      fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${start.latitude},${start.longitude}&destinations=${end.latitude},${end.longitude}&key=${GOOGLE_API_KEY}`)
+        .then(res => res.json())
+        .then(result => {
+          // console.log(result.rows[0].elements[0].distance)
+          dis = result.rows[0].elements[0].distance.text;
+          dur = result.rows[0].elements[0].duration.text;
+          console.log('New distance :', dis, 'New Duration:', dur)
+        })
+        .catch(err => console.log('Error=-=-= :', err))
       setTimeout(() => {
         setState(prevState => ({
           ...prevState,
-          distance: Math.floor(result),
+          distance: dis,
+          duration: dur,
           bikeRegion: {
             latitudeDelta: prevState.bikeRegion.latitudeDelta,
             longitudeDelta: prevState.bikeRegion.longitudeDelta,
@@ -75,7 +87,7 @@ const MapScreen = () => {
           }
         }))
         setIndex(index + 1)
-      }, 2000);
+      }, 3000);
     } else {
       if (locationChosen) {
         Alert.alert('Pitstop completed');
@@ -106,7 +118,7 @@ const MapScreen = () => {
           latitude: coords.latitude,
           longitude: coords.longitude
         },
-        locationChosen: true
+        // locationChosen: true
       };
     });
   };
@@ -141,8 +153,8 @@ const MapScreen = () => {
           }));
         },
         err => {
-          console.log(err);
-          alert("Fetching the Position failed, please pick one manually!");
+          console.log(err.message);
+          // alert("Fetching the Position failed, please pick one manually!");
         },
         {
           timeout: 2000,
@@ -198,9 +210,17 @@ const MapScreen = () => {
     }
   }
   const watchPositionHandler = () => {
-    navigator.geolocation.watchPosition((position) => {
+    watchRef = navigator.geolocation.watchPosition(async (position) => {
+      console.log('Position :', position)
       const lastPosition = JSON.stringify(position);
-      console.log('Last Position :', lastPosition)
+      const { latitude, longitude } = position.coords;
+      const response = await Geocoder.from({ latitude, longitude });
+      if (response && response !== undefined) {
+        const address = response.results[0].formatted_address;
+        const location = address.substring(0, address.indexOf(","));
+        console.log('location :', location)
+      }
+      console.log('Last Position :', lastPosition);
       // this.setState({ lastPosition });
     },
       err => {
@@ -221,7 +241,7 @@ const MapScreen = () => {
     );
   }
   // console.log("Map Ref :", mapRef);
-  // console.log("region", region);
+  console.log("region", region);
   // console.log("LOCATION", location);
   // console.log("Destination", destination);
   // console.log("AllCords", allCords);
@@ -272,12 +292,12 @@ const MapScreen = () => {
               <LocationBox>
                 <LocationTimeBox>
                   <LocationTimeText>{duration}</LocationTimeText>
-                  <LocationTimeTextSmall>MIN</LocationTimeTextSmall>
+                  {/* <LocationTimeTextSmall>MIN</LocationTimeTextSmall> */}
                 </LocationTimeBox>
                 <LocationText>{location}</LocationText>
                 <LocationTimeBox>
                   <LocationTimeText>{distance}</LocationTimeText>
-                  <LocationTimeTextSmall>KM</LocationTimeTextSmall>
+                  {/* <LocationTimeTextSmall>KM</LocationTimeTextSmall> */}
                 </LocationTimeBox>
               </LocationBox>
             </Marker>
@@ -304,11 +324,8 @@ const MapScreen = () => {
       </MapView>
       <Search onLocationSelected={handleLocationSelected} />
       <View style={styles.button}>
-        <Button title="Watch Position" onPress={watchPositionHandler} />
-      </View>
-      {/* <View style={styles.button}>
         <Button title="Locate Me" onPress={getLocationHandler} />
-      </View> */}
+      </View>
       {/* <View style={styles.button}>
         <Button title="Pitstop 1" onPress={getLocationHandler} />
       </View>
