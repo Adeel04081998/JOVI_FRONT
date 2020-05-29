@@ -60,6 +60,7 @@ const MapScreen = () => {
     if (allCords && allCords !== undefined && allCords.length && index < allCords.length && locationChosen !== false) {
       var dis = null;
       var dur = null;
+      var loc = null;
       let start = {
         latitude: allCords[index].latitude,
         longitude: allCords[index].longitude,
@@ -71,10 +72,10 @@ const MapScreen = () => {
       fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?origins=${start.latitude},${start.longitude}&destinations=${end.latitude},${end.longitude}&key=${GOOGLE_API_KEY}`)
         .then(res => res.json())
         .then(result => {
-          // console.log(result.rows[0].elements[0].distance)
           dis = result.rows[0].elements[0].distance.text;
           dur = result.rows[0].elements[0].duration.text;
-          console.log('New distance :', dis, 'New Duration:', dur)
+          loc = result.origin_addresses[0].substring(0, result.origin_addresses[0].indexOf(','))
+          console.log('Result :', result, 'New distance :', dis, 'New Duration:', dur)
         })
         .catch(err => console.log('Error=-=-= :', err))
       setTimeout(() => {
@@ -82,6 +83,7 @@ const MapScreen = () => {
           ...prevState,
           distance: dis,
           duration: dur,
+          location: loc,
           bikeRegion: {
             latitudeDelta: prevState.bikeRegion.latitudeDelta,
             longitudeDelta: prevState.bikeRegion.longitudeDelta,
