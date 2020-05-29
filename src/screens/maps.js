@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, Fragment } from 'react'
 import { StyleSheet, View, Button, Dimensions, Platform, PermissionsAndroid, Image, Text, Alert } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, AnimatedRegion, Callout, CalloutSubview, UrlTile, Overlay } from "react-native-maps";
 import Search from './search';
-import bikeIcon from '../assets/bike.png';
+import bikeIcon from '../assets/arrow.png';
 import {
   LocationBox,
   LocationText,
@@ -28,7 +28,8 @@ const MapScreen = () => {
       longitudeDelta:
         Dimensions.get("window").width /
         Dimensions.get("window").height *
-        0.0122
+        0.0122,
+      rotation: 0
     },
     region: {
       latitude: 33.666906,
@@ -46,9 +47,11 @@ const MapScreen = () => {
     distance: null,
   }
   const [state, setState] = useState(initState);
+
   useEffect(() => {
     getLocationHandler();
   }, [])
+  
   const { locationChosen, region, destination, duration, location, distance, bikeRegion, allCords } = state;
   const [index, setIndex] = useState(0);
   useEffect(() => {
@@ -72,6 +75,7 @@ const MapScreen = () => {
             longitudeDelta: prevState.bikeRegion.longitudeDelta,
             latitude: allCords[index].latitude,
             longitude: allCords[index].longitude,
+            rotation: angleFromCoordinate(prevState.bikeRegion.latitude, prevState.bikeRegion.longitude, allCords[index].latitude, allCords[index].longitude)
           }
         }))
         setIndex(index + 1)
@@ -220,6 +224,24 @@ const MapScreen = () => {
       }
     );
   }
+
+  const angleFromCoordinate = (lat1, lon1, lat2, lon2) => {
+    let p1 = {
+        x: lat1,
+        y: lon1
+    };
+
+    let p2 = {
+        x: lat2,
+        y: lon2
+    };
+
+    // angle in degrees
+    let angleDeg = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+
+    return angleDeg;
+  }
+
   // console.log("Map Ref :", mapRef);
   // console.log("region", region);
   // console.log("LOCATION", location);
@@ -236,6 +258,7 @@ const MapScreen = () => {
         showsUserLocation={true}
         loadingEnabled={true}
         followsUserLocation={true}
+        zoomControlEnabled={true}
       >
         {/* <UrlTile
           urlTemplate={"http://c.tile.stamen.com/watercolor/{z}/{x}/{y}.jpg"}
@@ -264,10 +287,10 @@ const MapScreen = () => {
               opacity={1.0}
               bounds={[[33.66691, 73.07537]]}
             /> */}
-            <Marker coordinate={bikeRegion} anchor={{ x: 0, y: 0 }}>
+            <Marker.Animated coordinate={bikeRegion} anchor={{ x: 0, y: 0 }} rotation={locationChosen ? bikeRegion.rotation : null}>
               <Image
                 source={bikeIcon}
-                style={{ height: 50, width: 60 }}
+                style={{ height: 50, width: 50 }}
               />
               <LocationBox>
                 <LocationTimeBox>
@@ -280,7 +303,7 @@ const MapScreen = () => {
                   <LocationTimeTextSmall>KM</LocationTimeTextSmall>
                 </LocationTimeBox>
               </LocationBox>
-            </Marker>
+            </Marker.Animated>
           </Fragment>
         )}
         <Marker coordinate={region} anchor={{ x: 0, y: 0 }} title={location} draggable onDragEnd={(e) => markerDragHandler(e, 'end')} onDragStart={(e) => markerDragHandler(e, 'start')}>
