@@ -4,7 +4,6 @@ import MapView, { Marker, PROVIDER_GOOGLE, AnimatedRegion, Callout, CalloutSubvi
 import Search from './search';
 import bikeIcon from '../assets/bike.png';
 import {
-  Back,
   LocationBox,
   LocationText,
   LocationTimeBox,
@@ -19,6 +18,7 @@ import haversine from 'haversine';
 Geocoder.init(GOOGLE_API_KEY);
 const MapScreen = () => {
   var mapRef = useRef(null);
+  var watchRef = useRef(null);
   const initState = {
     allCords: [],
     bikeRegion: {
@@ -122,19 +122,19 @@ const MapScreen = () => {
       //   }
       // }
       // console.log('Navigator :', navigator)
-      let tempLat = 33.666906;
-      let tempLong = 73.075373;
+      // let tempLat = 33.666906;
+      // let tempLong = 73.075373;
       navigator.geolocation.getCurrentPosition(
         async ({ coords: { latitude, longitude } }) => {
-          const response = await Geocoder.from({ latitude: tempLat, longitude: tempLong });
+          const response = await Geocoder.from({ latitude, longitude });
           const address = response.results[0].formatted_address;
           const location = address.substring(0, address.indexOf(","));
           setState(prevState => ({
             ...prevState,
             location,
             region: {
-              latitude: tempLat,
-              longitude: tempLong,
+              latitude,
+              longitude,
               latitudeDelta: 0.0143,
               longitudeDelta: 0.0134
             }
@@ -146,9 +146,15 @@ const MapScreen = () => {
         },
         {
           timeout: 2000,
+          // Is a positive value representing the maximum length of time (in milliseconds) the device is allowed to take in order to return a position. Defaults to INFINITY
           enableHighAccuracy: true,
-          maximumAge: 1000
-        })
+          // Is a boolean representing if to use GPS or not. If set to true, a GPS position will be requested. If set to false, a WIFI location will be requested
+          maximumAge: 1000,
+          // Is a positive value indicating the maximum age in milliseconds of a possible cached position that is acceptable to return. 
+          // If set to 0, it means that the device cannot use a cached position and must attempt to retrieve the real current position.
+          //  If set to Infinity the device will always return a cached position regardless of its age. Defaults to INFINITY
+        }
+      )
     } catch (error) {
       console.log('getLocationhandler Catch Error :', error)
     }
@@ -190,6 +196,29 @@ const MapScreen = () => {
       const { coordinate } = e.nativeEvent;
       setState(prevState => ({ ...prevState, region: coordinate }));
     }
+  }
+  const watchPositionHandler = () => {
+    navigator.geolocation.watchPosition((position) => {
+      const lastPosition = JSON.stringify(position);
+      console.log('Last Position :', lastPosition)
+      // this.setState({ lastPosition });
+    },
+      err => {
+        console.log('Error during watchPosition func: ', err)
+      },
+      {
+        timeout: 2000,
+        // Is a positive value representing the maximum length of time (in milliseconds) the device is allowed to take in order to return a position. Defaults to INFINITY
+        enableHighAccuracy: true,
+        // Is a boolean representing if to use GPS or not. If set to true, a GPS position will be requested. If set to false, a WIFI location will be requested
+        maximumAge: 1000,
+        // Is a positive value indicating the maximum age in milliseconds of a possible cached position that is acceptable to return. 
+        // If set to 0, it means that the device cannot use a cached position and must attempt to retrieve the real current position.
+        //  If set to Infinity the device will always return a cached position regardless of its age. Defaults to INFINITY
+        useSignificantChanges: true
+        //Uses the battery-efficient native significant changes APIs to return locations. Locations will only be returned when the device detects a significant distance has been breached. Defaults to FALSE
+      }
+    );
   }
   // console.log("Map Ref :", mapRef);
   // console.log("region", region);
@@ -275,14 +304,17 @@ const MapScreen = () => {
       </MapView>
       <Search onLocationSelected={handleLocationSelected} />
       <View style={styles.button}>
-        <Button title="Locate Me" onPress={getLocationHandler} />
+        <Button title="Watch Position" onPress={watchPositionHandler} />
       </View>
-      <View style={styles.button}>
+      {/* <View style={styles.button}>
+        <Button title="Locate Me" onPress={getLocationHandler} />
+      </View> */}
+      {/* <View style={styles.button}>
         <Button title="Pitstop 1" onPress={getLocationHandler} />
       </View>
       <View style={styles.button}>
         <Button title="Pitstop 2" onPress={getLocationHandler} />
-      </View>
+      </View> */}
       <Text>
         {/* {
           state.locationChosen ?
