@@ -307,10 +307,10 @@ const MapScreen = () => {
               opacity={1.0}
               bounds={[[33.66691, 73.07537]]}
             /> */}
-            <Marker.Animated coordinate={bikeRegion} anchor={{ x: 0, y: 0 }} rotation={locationChosen ? bikeRegion.rotation : null}>
+            <Marker.Animated coordinate={bikeRegion} anchor={{ x: 0.06, y: 0 }} rotation={locationChosen ? bikeRegion.rotation : null}>
               <Image
                 source={bikeIcon}
-                style={{ height: 50, width: 50 }}
+                style={{ height: 30, width: 30 }}
               />
               <LocationBox>
                 <LocationTimeBox>
