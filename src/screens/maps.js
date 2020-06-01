@@ -8,20 +8,17 @@ import {
   LocationText,
   LocationTimeBox,
   LocationTimeText,
-  LocationTimeTextSmall
 } from "./styles";
 import { getPixelSize } from '../utils';
 import Directions from './directions';
 import Geocoder from "react-native-geocoding";
 import { GOOGLE_API_KEY } from '../configs';
-import haversine from 'haversine';
 Geocoder.init(GOOGLE_API_KEY);
 const MapScreen = () => {
   var mapRef = useRef(null);
-  var watchRef = null;
+  let watchRef = null;
   const initState = {
     allCords: [],
-    watchRef: useRef(null),
     bikeRegion: {
       latitude: 33.666906,
       longitude: 73.075373,
@@ -53,7 +50,7 @@ const MapScreen = () => {
     getLocationHandler();
     watchPositionHandler();
   }, [])
-  
+
   const { locationChosen, region, destination, duration, location, distance, bikeRegion, allCords } = state;
   const [index, setIndex] = useState(0);
   useEffect(() => {
@@ -249,13 +246,13 @@ const MapScreen = () => {
 
   const angleFromCoordinate = (lat1, lon1, lat2, lon2) => {
     let p1 = {
-        x: lat1,
-        y: lon1
+      x: lat1,
+      y: lon1
     };
 
     let p2 = {
-        x: lat2,
-        y: lon2
+      x: lat2,
+      y: lon2
     };
 
     // angle in degrees
