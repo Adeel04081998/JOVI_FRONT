@@ -5,6 +5,9 @@ import {
   View,
   Text
 } from 'react-native';
+
+// import GetStartJovi from './src/screens/GetStartJovi/getstartjovi';
+
 navigator.geolocation = require('@react-native-community/geolocation');
 import SplashScreen from 'react-native-splash-screen';
 import plateformSpecific from './src/utils/plateformSpecific';
