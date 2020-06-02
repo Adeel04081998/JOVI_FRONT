@@ -8,7 +8,7 @@ import {
   Text
 } from 'react-native';
 
-import Get_start_jovi from './src/screens/get_start_jovi/get_start_jovi';
+import GetStartJovi from './src/screens/GetStartJovi/getstartjovi';
 
 navigator.geolocation = require('@react-native-community/geolocation');
 const App = () => {
@@ -16,7 +16,7 @@ const App = () => {
     <>
       <StatusBar barStyle="dark-content" />
       <View style={styles.container}>
-        <Get_start_jovi />
+        <GetStartJovi />
         {/* <Text style={styles.text}>Welcome to Jovi</Text> */}
       </View>
     </>
