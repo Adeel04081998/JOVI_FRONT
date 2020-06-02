@@ -7,13 +7,17 @@ import {
   View,
   Text
 } from 'react-native';
+
+import Get_start_jovi from './src/screens/get_start_jovi/get_start_jovi';
+
 navigator.geolocation = require('@react-native-community/geolocation');
 const App = () => {
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <View style={styles.container}>
-        <Text style={styles.text}>The Jovi App</Text>
+        <Get_start_jovi />
+        {/* <Text style={styles.text}>Welcome to Jovi</Text> */}
       </View>
     </>
   );
